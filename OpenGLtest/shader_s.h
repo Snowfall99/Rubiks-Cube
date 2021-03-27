@@ -161,11 +161,6 @@ public:
         glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
     }
 
-    void setColor(float ourColor) const {
-        int vertexColorLocation = glGetUniformLocation(ID, "ourColor");
-        glUniform4f(vertexColorLocation, 0.0f, ourColor, 0.0f, 1.0f);
-    }
-
 private:
     // utility function for checking shader compilation/linking errors.
     // ------------------------------------------------------------------------
