@@ -20,10 +20,10 @@ void main()
 {
 	gl_Position = projection * view * model * vec4(aPos, 1.0);
 	if (direction == 0) {
-		ourColor = vec3(255.0f, 0.0f, 0.0f);
+		ourColor = back_color;
 	} else if (direction == 1) {
 		ourColor = vec3(0.0f, 255.0f, 0.0f);
-	} else if {
+	} else {
 		ourColor = vec3(0.0f, 0.0f, 255.0f);
 	}
 	

@@ -151,25 +151,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="glad.c" />
+    <ClCompile Include="cube.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="stb_image.cpp" />
+    <ClCompile Include="viewer_gl.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cube.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="shader_s.h" />
-    <ClInclude Include="stb_image.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="block.fs" />
-    <None Include="block.vs" />
+    <ClInclude Include="viewer.h" />
+    <ClInclude Include="virtual_rotate.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="OpenGLtest.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="resources\awesomeface.png" />
-    <Image Include="resources\container.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
