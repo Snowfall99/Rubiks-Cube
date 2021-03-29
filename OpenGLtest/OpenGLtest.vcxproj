@@ -156,6 +156,8 @@
     <ClCompile Include="viewer_gl.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="algo.h" />
+    <ClInclude Include="camera.h" />
     <ClInclude Include="cube.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="viewer.h" />

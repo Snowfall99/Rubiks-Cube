@@ -38,6 +38,12 @@
     <ClInclude Include="virtual_rotate.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="algo.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="camera.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="OpenGLtest.rc">

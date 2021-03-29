@@ -1,6 +1,7 @@
 #include <Windows.h>
 #include "viewer.h"
 #include "virtual_rotate.h"
+#include "camera.h"
 #include <memory>
 #include <chrono>
 #include <tuple>
@@ -9,8 +10,14 @@
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 namespace rubiks_cube {
+	int WINDOW_WIDTH = 600;
+	int WINDOW_HEIGHT = 800;
+
 	class rotate_manager_t {
 		typedef std::chrono::system_clock clock_type;
 		std::chrono::time_point<clock_type> t_s;
@@ -62,6 +69,8 @@ namespace rubiks_cube {
 		static void on_resize(GLFWwindow*, int, int);
 		static void on_mouse_button(GLFWwindow*, int, int, int);
 		static void on_mouse_move(GLFWwindow*, double, double);
+		void processInput(GLFWwindow*);
+		static void on_key_callback(GLFWwindow*, int, int, int, int);
 	private:
 		template<typename CubeType>
 		void draw_cube(const CubeType&);
@@ -114,11 +123,12 @@ namespace rubiks_cube {
 		glfwSetWindowSizeCallback(window, on_resize);
 		glfwSetCursorPosCallback(window, on_mouse_move);
 		glfwSetMouseButtonCallback(window, on_mouse_button);
+		glfwSetKeyCallback(window, on_key_callback);
 
 		glfwMakeContextCurrent(window);
 		//glEnable(GL_MULTISAMPLE);
 		glEnable(GL_DEPTH_TEST);
-
+		
 		vball.set_rotate(45, { -1, 1, 0 });
 
 		return true;
@@ -128,12 +138,14 @@ namespace rubiks_cube {
 	{
 		while (!glfwWindowShouldClose(window))
 		{
+			processInput(window);
+
 			glfwPollEvents();
 
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			update_rotate();
-			if (cube_size == 3)
-				draw_cube(cube);
+
+			draw_cube(cube);
 
 			glfwSwapBuffers(window);
 		}
@@ -380,9 +392,62 @@ namespace rubiks_cube {
 		viewer->vball.set_middle(x / w - 0.5, y / h - 0.5);
 	}
 
+	void viewer_gl::on_key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
+	{
+		// 获取当前窗口指针
+		viewer_gl* viewer = reinterpret_cast<viewer_gl*>(glfwGetWindowUserPointer(window));
+
+		const char* face_str = "UDFBLR";
+
+		if (key == GLFW_KEY_U && action == GLFW_PRESS) {
+			viewer->add_rotate(face_t::top, 1);
+			std::putchar(face_str[0]);
+		}
+		if (key == GLFW_KEY_D && action == GLFW_PRESS) {
+			viewer->add_rotate(face_t::bottom, 1);
+			std::putchar(face_str[1]);
+		}
+		if (key == GLFW_KEY_F && action == GLFW_PRESS) {
+			viewer->add_rotate(face_t::front, 1);
+			std::putchar(face_str[2]);
+		}
+		if (key == GLFW_KEY_B && action == GLFW_PRESS) {
+			viewer->add_rotate(face_t::back, 1);
+			std::putchar(face_str[3]);
+		}
+		if (key == GLFW_KEY_L && action == GLFW_PRESS) {
+			viewer->add_rotate(face_t::left, 1);
+			std::putchar(face_str[4]);
+		}
+		if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+			viewer->add_rotate(face_t::right, 1);
+			std::putchar(face_str[5]);
+		}
+		return;
+	}
+
+	void viewer_gl::processInput(GLFWwindow* window) 
+	{
+		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+			glfwSetWindowShouldClose(window, true);
+		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+			add_rotate(face_t::top, 1);
+		/*if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS)
+			add_rotate(face_t::top, 1);
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+			add_rotate(face_t::bottom, 1);
+		if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+			add_rotate(face_t::right, 1);
+		if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
+			add_rotate(face_t::left, 1);
+		if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
+			add_rotate(face_t::back, 1);
+		if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
+			add_rotate(face_t::front, 1);*/
+	}
+
 	std::shared_ptr<viewer_t> create_opengl_viewer()
 	{
 		return std::make_shared<viewer_gl>();
 	}
-
 }
