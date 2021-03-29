@@ -43,20 +43,81 @@ move_seq_t read_file(const char* filename)
 
 	// add command into move sequence
 	move_seq_t move_seq;
-	for (int i = 0; i < line.length(); i++) {
-		if (line[i] == 'U')
-			move_seq.push_back(move_step_t{ face_t::top, 1 });
-		if (line[i] == 'D')
-			move_seq.push_back(move_step_t{ face_t::bottom, 1 });
-		if (line[i] == 'R')
-			move_seq.push_back(move_step_t{ face_t::right, 1 });
-		if (line[i] == 'L')
-			move_seq.push_back(move_step_t{ face_t::left, 1 });
-		if (line[i] == 'F')
-			move_seq.push_back(move_step_t{ face_t::front, 1 });
-		if (line[i] == 'B')
-			move_seq.push_back(move_step_t{ face_t::back, 1 });
+	int i;
+	for (i = 0; i < line.length(); i++) {
+		if (line[i] == 'U') {
+			if (line[i + 1] == '2') {
+				move_seq.push_back(move_step_t{ face_t::top, 2 });
+				i += 1;
+			}
+			else if (line[i + 1] == '\'') {
+				move_seq.push_back(move_step_t{ face_t::top, 3 });
+				i += 1;
+			}
+			else
+				move_seq.push_back(move_step_t{ face_t::top, 1 });
+		}
+		if (line[i] == 'D') {
+			if (line[i + 1] == '2')
+				move_seq.push_back(move_step_t{ face_t::bottom, 2 });
+			else if (line[i + 1] == '\'')
+				move_seq.push_back(move_step_t{ face_t::bottom, 3 });
+			else
+				move_seq.push_back(move_step_t{ face_t::bottom, 1 });
+		}
+		if (line[i] == 'R') {
+			if (line[i + 1] == '2') {
+				move_seq.push_back(move_step_t{ face_t::right, 2 });
+				i += 1;
+			}
+			else if (line[i + 1] == '\'') {
+				move_seq.push_back(move_step_t{ face_t::right, 3 });
+				i += 1;
+			}
+			else
+				move_seq.push_back(move_step_t{ face_t::right, 1 });
+		}
+		if (line[i] == 'L') {
+			if (line[i + 1] == '2') {
+				move_seq.push_back(move_step_t{ face_t::left, 2 });
+				i += 1;
+			}
+			else if (line[i + 1] == '\'') {
+				move_seq.push_back(move_step_t{ face_t::left, 3 });
+				i += 1;
+			}
+			else
+				move_seq.push_back(move_step_t{ face_t::left, 1 });
+		}
+		if (line[i] == 'F') {
+			if (line[i + 1] == '2') {
+				move_seq.push_back(move_step_t{ face_t::front, 2 });
+				i += 1;
+			}
+			else if (line[i + 1] == '\'') {
+				move_seq.push_back(move_step_t{ face_t::front, 3 });
+				i += 1;
+			}
+			else
+				move_seq.push_back(move_step_t{ face_t::front, 1 });
+		}
+		if (line[i] == 'B') {
+			if (line[i + 1] == '2') {
+				move_seq.push_back(move_step_t{ face_t::back, 2 });
+				i += 1;
+			}
+			else if (line[i + 1] == '\'') {
+				move_seq.push_back(move_step_t{ face_t::back, 3 });
+				i += 1;
+			}
+			else
+				move_seq.push_back(move_step_t{ face_t::back, 1 });
+		}
 	}
+	/*if (i  line.length() - 1)
+		return move_seq;
+	else 
+		move_seq.push_back()*/
 	
 	return move_seq;
 }
@@ -100,7 +161,7 @@ int main(int argc, char** argv) {
 
 	for (move_step_t& step : move_seq) {
 		c.rotate(step.first, step.second);
-		put_rotate(step.first, step.second);
+		put_rotate(step.first, (step.second % 4 + 4) & 3);
 	}
 
 	std::putchar('\n');

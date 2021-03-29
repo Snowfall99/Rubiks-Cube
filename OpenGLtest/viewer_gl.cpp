@@ -430,20 +430,6 @@ namespace rubiks_cube {
 	{
 		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			glfwSetWindowShouldClose(window, true);
-		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-			add_rotate(face_t::top, 1);
-		/*if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS)
-			add_rotate(face_t::top, 1);
-		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-			add_rotate(face_t::bottom, 1);
-		if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
-			add_rotate(face_t::right, 1);
-		if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS)
-			add_rotate(face_t::left, 1);
-		if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
-			add_rotate(face_t::back, 1);
-		if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
-			add_rotate(face_t::front, 1);*/
 	}
 
 	std::shared_ptr<viewer_t> create_opengl_viewer()
