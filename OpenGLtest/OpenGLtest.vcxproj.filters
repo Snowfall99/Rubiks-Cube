@@ -41,13 +41,18 @@
     <ClInclude Include="algo.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="camera.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="OpenGLtest.rc">
       <Filter>资源文件</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="skybox.fs">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="skybox.vs">
+      <Filter>源文件</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -1,12 +1,4 @@
 #include <Windows.h>
-#include "viewer.h"
-#include "virtual_rotate.h"
-#include "camera.h"
-#include <memory>
-#include <chrono>
-#include <tuple>
-#include <queue>
-#include <algorithm>
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
 
@@ -14,8 +6,21 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+
+#include "viewer.h"
+#include "virtual_rotate.h"
+
+#include <memory>
+#include <chrono>
+#include <tuple>
+#include <queue>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <iostream>
+
 namespace rubiks_cube {
-	int WINDOW_WIDTH = 600;
+	int WINDOW_WIDTH = 800;
 	int WINDOW_HEIGHT = 800;
 
 	class rotate_manager_t {
@@ -71,6 +76,7 @@ namespace rubiks_cube {
 		static void on_mouse_move(GLFWwindow*, double, double);
 		void processInput(GLFWwindow*);
 		static void on_key_callback(GLFWwindow*, int, int, int, int);
+
 	private:
 		template<typename CubeType>
 		void draw_cube(const CubeType&);
@@ -78,7 +84,6 @@ namespace rubiks_cube {
 		void update_rotate();
 		void set_color(int);
 	private:
-		// face_type, depth, cnt
 		typedef std::tuple<face_t::face_type, int, int> rotate_que_t;
 		std::queue<rotate_que_t> rotate_que;
 
@@ -109,12 +114,13 @@ namespace rubiks_cube {
 		if (!glfwInit())
 			return false;
 
-		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 		glfwWindowHint(GLFW_SAMPLES, 4);
 
-		window = glfwCreateWindow(600, 600, "Rubik's Cube", NULL, NULL);
+		window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Rubik's Cube", NULL, NULL);
 		if (!window)
 		{
+			std::cout << "Failed to create GLFW window" << std::endl;
 			glfwTerminate();
 			return false;
 		}
@@ -126,9 +132,10 @@ namespace rubiks_cube {
 		glfwSetKeyCallback(window, on_key_callback);
 
 		glfwMakeContextCurrent(window);
-		//glEnable(GL_MULTISAMPLE);
-		glEnable(GL_DEPTH_TEST);
 		
+		// configure global opengl state
+		glEnable(GL_DEPTH_TEST);
+
 		vball.set_rotate(45, { -1, 1, 0 });
 
 		return true;
@@ -138,11 +145,17 @@ namespace rubiks_cube {
 	{
 		while (!glfwWindowShouldClose(window))
 		{
+
+			// Input
 			processInput(window);
 
 			glfwPollEvents();
 
+			// render
+			// ------
+			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			
 			update_rotate();
 
 			draw_cube(cube);
