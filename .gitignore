@@ -1,0 +1,9 @@
+.vs
+Debug
+rubiks_cube.sln
+rubiks_cube/Debug
+rubiks_cube/glad.c
+rubiks_cube/rubiks_cube.vcxproj
+rubiks_cube/rubiks_cube.vcxproj.filters
+rubiks_cube/rubiks_cube.vcxproj.user
+rubiks_cube/stb_image.h
