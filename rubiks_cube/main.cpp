@@ -1,3 +1,4 @@
+#include <Windows.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #define STB_IMAGE_IMPLEMENTATION
@@ -77,13 +78,16 @@ move_seq_t randomState(int steps = 15)
 }
 
 // settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 800;
+const unsigned int SRC_WIDTH = GetSystemMetrics(SM_CXSCREEN);
+const unsigned int SRC_HEIGHT = GetSystemMetrics(SM_CYSCREEN);
 
 // camera
 Camera camera(glm::vec3(5.0f, 5.0f, 5.0f));
-float lastX = (float)SCR_WIDTH / 2.0;
-float lastY = (float)SCR_HEIGHT / 2.0;
+float yaw = -90.0f;	// yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
+float pitch = 0.0f;
+float fov = 45.0f;
+float lastX = (float)SRC_WIDTH / 2.0;
+float lastY = (float)SRC_HEIGHT / 2.0;
 bool firstMouse = true;
 
 // rotate angle
@@ -120,7 +124,9 @@ int main()
 
     // glfw window creation
     // --------------------
-    GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Rubiks Cube", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(SRC_WIDTH, SRC_HEIGHT, "Rubiks Cube", NULL, NULL);
+    /*glViewport(0, 0, SRC_WIDTH, SRC_HEIGHT);*/
+
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -374,7 +380,7 @@ int main()
 
     // pass projection matrix to shader (as projection matrix rarely changes there's no need to do this per frame)
     // -----------------------------------------------------------------------------------------------------------
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SRC_WIDTH / (float)SRC_HEIGHT, 0.1f, 100.0f);
     cubeShader.setMat4("projection", projection);
     // skyboxShader.setMat4("projection", projection);
 
@@ -731,7 +737,7 @@ int main()
             }
             lock.unlock();
 
-            //更新完点之后，我再重新画这些点
+            // Re-draw all the points after updating
             for (int i = 0; i < 27; i++)
             {
                 glm::mat4 tempModel = currentModel;
@@ -797,31 +803,40 @@ void processInput(GLFWwindow* window)
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
+    float cameraSpeed = 2.5 * deltaTime;
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+        camera.Position += cameraSpeed * camera.Front;
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+        camera.Position -= cameraSpeed * camera.Front;
+    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+        camera.Position -= glm::normalize(glm::cross(camera.Front, camera.Up)) * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+        camera.Position += glm::normalize(glm::cross(camera.Front, camera.Up)) * cameraSpeed;
+
     deltaY = 0;
     deltaX = 0;
     deltaZ = 0;
-    float cameraSpeed = 2.5 * deltaTime;
-    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
     {
         deltaX -= 0.015f;
     }
-    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
     {
         deltaX += 0.015f;
     }
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
     {
         deltaY -= 0.015f;
     }
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
     {
         deltaY += 0.015f;
     }
-    if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS)
     {
         deltaZ -= 0.015f;
     }
-    if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS)
     {
         deltaZ += 0.015f;
     }
@@ -831,7 +846,7 @@ void processInput(GLFWwindow* window)
         currentModel = glm::mat4(1.0f);
     }
     // Random state
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_7) == GLFW_PRESS)
     {
         random_state = randomState();
         for (auto &step: random_state) 
@@ -904,12 +919,29 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
     float xoffset = xpos - lastX;
     float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-
     lastX = xpos;
     lastY = ypos;
 
-    camera.ProcessMouseMovement(xoffset, yoffset);
+    float sensitivity = 0.1f; // change this value to your liking
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    yaw += xoffset;
+    pitch += yoffset;
+
+    // make sure that when pitch is out of bounds, screen doesn't get flipped
+    if (pitch > 89.0f)
+        pitch = 89.0f;
+    if (pitch < -89.0f)
+        pitch = -89.0f;
+
+    glm::vec3 front;
+    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front.y = sin(glm::radians(pitch));
+    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    camera.Front = glm::normalize(front);
 }
+
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 // ----------------------------------------------------------------------
