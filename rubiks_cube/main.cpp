@@ -46,12 +46,10 @@ enum State
 
 State state = STOP;
 State nextState = STOP;
-// store next state
-std::queue<State> rotate_queue;
 
-// store random state 
+// store rotate state
+std::queue<State> rotate_queue;
 typedef std::vector<State> move_seq_t;
-move_seq_t random_state;
 
 // Read state from a file
 move_seq_t readStateFromFile()
@@ -62,8 +60,7 @@ move_seq_t readStateFromFile()
     std::ifstream myFile(filename);
     if (!myFile.is_open())
     {
-        /* Todo: use a dialog box to show error messages */
-        std::puts("Unable to open file\n");
+        MessageBox(NULL, TEXT("Unable to open file <state.txt>"), TEXT("ERROR Message"), MB_ICONERROR | MB_OK);
         std::exit(-1);
     }
     std::string line;
@@ -142,6 +139,9 @@ LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
                 rotate_queue.push(step);
             }
             break;
+        case 3:
+            lightMov = !lightMov;
+            break;
         }
         return 0;
     }
@@ -180,6 +180,10 @@ glm::mat4 world = glm::mat4(1.0f);
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
+// lighting
+glm::vec3 lightPos(2.4f, 2.4f, 2.4f);
+bool lightMov = true;
+
 int main()
 {
     // glfw: initialize and configure
@@ -200,7 +204,7 @@ int main()
 
     if (window == NULL)
     {
-        std::cout << "Failed to create GLFW window" << std::endl;
+        MessageBox(NULL, TEXT("Failed to create GLFW window"), TEXT("ERROR Message"), MB_ICONERROR | MB_OK);
         glfwTerminate();
         return -1;
     }
@@ -217,7 +221,7 @@ int main()
     // ---------------------------------------
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
-        std::cout << "Failed to initialize GLAD" << std::endl;
+        MessageBox(NULL, TEXT("Failed to load GLAD"), TEXT("ERROR Message"), MB_ICONERROR | MB_OK);
         return -1;
     }
 
@@ -236,108 +240,109 @@ int main()
 
     AppendMenu(hMenu, MF_STRING, 1, TEXT("Random State"));
     AppendMenu(hMenu, MF_STRING, 2, TEXT("Read State"));
+    AppendMenu(hMenu, MF_STRING, 3, TEXT("Light Move/Stop"));
     SetMenu(hwndGL, hMenu);
 
     // build and compile our shader zprogram
     // ------------------------------------
     Shader cubeShader("cube.vs", "cube.fs");
     Shader skyboxShader("skybox.vs", "skybox.fs");
-
+    Shader lightCubeShader("lightcube.vs", "lightcube.fs");
+    
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
     float blockVertices[] = {
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
-        -0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
 
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
 
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
 
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
 
-        -0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
-
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
     };
 
     float color[] = {
         // Red
-        255.0f, 0.0f, 0.0f,
-        255.0f, 0.0f, 0.0f,
-        255.0f, 0.0f, 0.0f,
-        255.0f, 0.0f, 0.0f,
-        255.0f, 0.0f, 0.0f,
-        255.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 0.0f,
 
         // Orange
-        255.0f, 0.5f, 0.0f,
-        255.0f, 0.5f, 0.0f,
-        255.0f, 0.5f, 0.0f,
-        255.0f, 0.5f, 0.0f,
-        255.0f, 0.5f, 0.0f,
-        255.0f, 0.5f, 0.0f,
+        1.0f, 0.5f, 0.31f,
+        1.0f, 0.5f, 0.31f,
+        1.0f, 0.5f, 0.31f,
+        1.0f, 0.5f, 0.31f,
+        1.0f, 0.5f, 0.31f,
+        1.0f, 0.5f, 0.31f,
 
         // Green
-        0.0f, 255.0f, 0.0f,
-        0.0f, 255.0f, 0.0f,
-        0.0f, 255.0f, 0.0f,
-        0.0f, 255.0f, 0.0f,
-        0.0f, 255.0f, 0.0f,
-        0.0f, 255.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
+        0.0f, 1.0f, 0.0f,
 
         // Blue
-        0.0f, 0.0f, 255.0f,
-        0.0f, 0.0f, 255.0f,
-        0.0f, 0.0f, 255.0f,
-        0.0f, 0.0f, 255.0f,
-        0.0f, 0.0f, 255.0f,
-        0.0f, 0.0f, 255.0f,
+        0.0f, 0.0f, 1.0f,
+        0.0f, 0.0f, 1.0f,
+        0.0f, 0.0f, 1.0f,
+        0.0f, 0.0f, 1.0f,
+        0.0f, 0.0f, 1.0f,
+        0.0f, 0.0f, 1.0f,
 
         // White
-        255.0f, 255.0f, 255.0f,
-        255.0f, 255.0f, 255.0f,
-        255.0f, 255.0f, 255.0f,
-        255.0f, 255.0f, 255.0f,
-        255.0f, 255.0f, 255.0f,
-        255.0f, 255.0f, 255.0f,
+        1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,
+        1.0f, 1.0f, 1.0f,
 
         // Yellow
-        255.0f, 255.0f, 0.0f,
-        255.0f, 255.0f, 0.0f,
-        255.0f, 255.0f, 0.0f,
-        255.0f, 255.0f, 0.0f,
-        255.0f, 255.0f, 0.0f,
-        255.0f, 255.0f, 0.0f,
+        1.0f, 1.0f, 0.0f,
+        1.0f, 1.0f, 0.0f,
+        1.0f, 1.0f, 0.0f,
+        1.0f, 1.0f, 0.0f,
+        1.0f, 1.0f, 0.0f,
+        1.0f, 1.0f, 0.0f,
     };
 
     // blocks' world space positions
@@ -416,6 +421,49 @@ int main()
          1.0f, -1.0f,  1.0f
     };
 
+    float lightVertices[] = {
+       -0.5f, -0.5f, -0.5f,
+        0.5f, -0.5f, -0.5f,
+        0.5f,  0.5f, -0.5f,
+        0.5f,  0.5f, -0.5f,
+       -0.5f,  0.5f, -0.5f,
+       -0.5f, -0.5f, -0.5f,
+
+       -0.5f, -0.5f,  0.5f,
+        0.5f, -0.5f,  0.5f,
+        0.5f,  0.5f,  0.5f,
+        0.5f,  0.5f,  0.5f,
+       -0.5f,  0.5f,  0.5f,
+       -0.5f, -0.5f,  0.5f,
+
+       -0.5f,  0.5f,  0.5f,
+       -0.5f,  0.5f, -0.5f,
+       -0.5f, -0.5f, -0.5f,
+       -0.5f, -0.5f, -0.5f,
+       -0.5f, -0.5f,  0.5f,
+       -0.5f,  0.5f,  0.5f,
+
+        0.5f,  0.5f,  0.5f,
+        0.5f,  0.5f, -0.5f,
+        0.5f, -0.5f, -0.5f,
+        0.5f, -0.5f, -0.5f,
+        0.5f, -0.5f,  0.5f,
+        0.5f,  0.5f,  0.5f,
+
+       -0.5f, -0.5f, -0.5f,
+        0.5f, -0.5f, -0.5f,
+        0.5f, -0.5f,  0.5f,
+        0.5f, -0.5f,  0.5f,
+       -0.5f, -0.5f,  0.5f,
+       -0.5f, -0.5f, -0.5f,
+
+       -0.5f,  0.5f, -0.5f,
+        0.5f,  0.5f, -0.5f,
+        0.5f,  0.5f,  0.5f,
+        0.5f,  0.5f,  0.5f,
+       -0.5f,  0.5f,  0.5f,
+       -0.5f,  0.5f, -0.5f,
+    };
     // skybox VAO
     unsigned int skyboxVAO, skyboxVBO;
     glGenVertexArrays(1, &skyboxVAO);
@@ -436,6 +484,23 @@ int main()
         "resources/textures/skybox/back.jpg"
     };
     unsigned int cubemapTexture = loadCubemap(faces);
+    skyboxShader.use();
+    skyboxShader.setInt("skybox", 0);
+
+    // config lightCubeVBO
+    unsigned int lightCubeVBO;
+    glGenBuffers(1, &lightCubeVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, lightCubeVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(lightVertices), lightVertices, GL_STATIC_DRAW);
+    // configure the lightCube VAO
+    unsigned int lightCubeVAO;
+    glGenVertexArrays(1, &lightCubeVAO);
+    glBindVertexArray(lightCubeVAO);
+
+    // we only need to bind to the VBO (to link it with glVertexAttribPointer), no need to fill it; the VBO's data already contains all we need (it's already bound, but we do it again for educational purposes)
+    glBindBuffer(GL_ARRAY_BUFFER, lightCubeVBO);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
 
     // cube VAO
     unsigned int cubeVBO, cubeVAO;
@@ -445,23 +510,18 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(blockVertices), blockVertices, GL_STATIC_DRAW);
     // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    // texture coord attribute
+    // normal attribute
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    // color attribute
     unsigned int colorbuffer;
     glGenBuffers(1, &colorbuffer);
     glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(color), color, GL_STATIC_DRAW);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
-
-     // Shader configuration
-     cubeShader.use();
-
-    // pass projection matrix to shader (as projection matrix rarely changes there's no need to do this per frame)
-    // -----------------------------------------------------------------------------------------------------------
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SRC_WIDTH / (float)SRC_HEIGHT, 0.1f, 100.0f);
-    cubeShader.setMat4("projection", projection);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(2);
 
     // render loop
     // -----------
@@ -479,11 +539,27 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        if (lightMov == true) 
+        {
+            lightPos.x = sin(glfwGetTime()) * cos(glfwGetTime() / 2.0f) * 2.7f;
+            lightPos.y = cos(glfwGetTime()) * sin(glfwGetTime() / 2.0f) * 2.7f;
+            lightPos.z = cos(glfwGetTime()) * 2.7f;
+        }
+
+        // view/projection transformations
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SRC_WIDTH / (float)SRC_HEIGHT, 0.1f, 100.0f);
+        glm::mat4 view = camera.GetViewMatrix();
+        glm::mat4 model = glm::mat4(1.0f);
+
         // activate shader
         cubeShader.use();
+        cubeShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+        cubeShader.setVec3("lightPos", lightPos);
+        cubeShader.setVec3("viewPos", camera.Position);
         // camera/view transformation
-        glm::mat4 view = glm::lookAt(camera.Position, glm::vec3(0.f, 0.f, 0.f), camera.Up);
+        view = glm::lookAt(camera.Position, glm::vec3(0.f, 0.f, 0.f), camera.Up);
         cubeShader.setMat4("view", view);
+        cubeShader.setMat4("projection", projection);
         
         // calculate the model matrix for each object and pass it to shader before drawing
         currentModel = glm::rotate(currentModel, glm::radians(deltaX), glm::vec3(1.0f, 0.f, 0.f));
@@ -818,10 +894,16 @@ int main()
         }
         }
 
-        // cubes
-        glBindVertexArray(cubeVAO);
+        // draw the lamp object
+        lightCubeShader.use();
+        lightCubeShader.setMat4("projection", projection);
+        lightCubeShader.setMat4("view", view);
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, lightPos);
+        model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
+        lightCubeShader.setMat4("model", model);
+        glBindVertexArray(lightCubeVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
-        glBindVertexArray(0);
 
         // draw skybox as last
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
@@ -847,8 +929,10 @@ int main()
     // ------------------------------------------------------------------------
     glDeleteVertexArrays(1, &cubeVAO);
     glDeleteBuffers(1, &cubeVBO);
-    // glDeleteVertexArrays(1, &skyboxVAO);
-    // glDeleteBuffers(1, &skyboxVBO);
+    glDeleteVertexArrays(1, &skyboxVAO);
+    glDeleteBuffers(1, &skyboxVBO);
+    glDeleteVertexArrays(1, &lightCubeVAO);
+    glDeleteBuffers(1, &lightCubeVBO);
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
@@ -1025,7 +1109,7 @@ unsigned int loadCubemap(vector<std::string> faces)
         }
         else
         {
-            std::cout << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
+            MessageBox(NULL, TEXT("Cubemap texture failed to load"), TEXT("ERROR Message"), MB_ICONERROR | MB_OK);
             stbi_image_free(data);
         }
     }
