@@ -413,20 +413,6 @@ int main()
 
         glm::mat4 newModel;
 
-        //// draw skybox as last
-        //glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
-        //skyboxShader.use();
-        //view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
-        //skyboxShader.setMat4("view", view);
-        //skyboxShader.setMat4("projection", projection);
-        //// skybox cube
-        //glBindVertexArray(skyboxVAO);
-        //glActiveTexture(GL_TEXTURE0);
-        //glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-        //glDrawArrays(GL_TRIANGLES, 0, 36);
-        //glBindVertexArray(0);
-        //glDepthFunc(GL_LESS); // set depth function back to default
-
         switch (state)
         {
         case STOP:
@@ -684,7 +670,6 @@ int main()
                 float& z = newBlock.z;
                 if (nextState == ROTATE_L)
                 {
-                    //cout << "update X" << endl;
                     if (x > -1.01f && x < -0.99f)
                     {
                         //先更新旋转
@@ -694,7 +679,6 @@ int main()
                 }
                 else if (nextState == ROTATE_D)
                 {
-                    //cout << "update Y" << endl;
                     if (y > -1.01f && y < -0.99f)
                     {
                         glm::mat4 thistime = glm::rotate(world, glm::radians(targetangle), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -703,7 +687,6 @@ int main()
                 }
                 else if (nextState == ROTATE_B)
                 {
-                    //cout << "update Z" << endl;
                     if (z > -1.01f && z < -0.99f)
                     {
                         glm::mat4 thistime = glm::rotate(world, glm::radians(targetangle), glm::vec3(0.0f, 0.0f, 1.0f));
@@ -750,7 +733,6 @@ int main()
             }
 
             state = STOP;
-            targetangle = 0;
             nextState = STOP;
             break;
         }
@@ -840,7 +822,7 @@ void processInput(GLFWwindow* window)
     {
         deltaZ += 0.015f;
     }
-    // Reset
+    // Reset position
     if (glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS)
     {
         currentModel = glm::mat4(1.0f);
@@ -862,37 +844,37 @@ void on_key_callback(GLFWwindow* window, int key, int scancode, int action, int 
     {
         lock_guard<mutex> lock(axismutex);
         rotate_queue.push(ROTATE_R);
-        targetangle = 90;
+        //targetangle = 90;
     }
     if (key == GLFW_KEY_L && action == GLFW_PRESS)
     {
         lock_guard<mutex> lock(axismutex);
         rotate_queue.push(ROTATE_L);
-        targetangle = 90;
+        //targetangle = 90;
     }
     if (key == GLFW_KEY_U && action == GLFW_PRESS)
     {
         lock_guard<mutex> lock(axismutex);
         rotate_queue.push(ROTATE_U);
-        targetangle = 90;
+        //targetangle = 90;
     }
     if (key == GLFW_KEY_D && action == GLFW_PRESS)
     {
         lock_guard<mutex> lock(axismutex);
         rotate_queue.push(ROTATE_D);
-        targetangle = 90;
+        //targetangle = 90;
     }
     if (key == GLFW_KEY_F && action == GLFW_PRESS)
     {
         lock_guard<mutex> lock(axismutex);
         rotate_queue.push(ROTATE_F);
-        targetangle = 90;
+        //targetangle = 90;
     }
     if (key == GLFW_KEY_B && action == GLFW_PRESS)
     {
         lock_guard<mutex> lock(axismutex);
         rotate_queue.push(ROTATE_B);
-        targetangle = 90;
+        //targetangle = 90;
     }
 }
 
