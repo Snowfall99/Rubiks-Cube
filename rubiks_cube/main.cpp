@@ -114,40 +114,6 @@ move_seq_t randomState(int steps = 15)
     return rs;
 }
 
-HWND hwndGL;
-WNDPROC OldProc;
-
-LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-    move_seq_t rs;
-    switch (message)
-    {
-    case WM_COMMAND:
-        switch (wParam)
-        {
-        case 1:
-            rs = randomState();
-            for (auto& step : rs)
-            {
-                rotate_queue.push(step);
-            }
-            break;
-        case 2:
-            rs = readStateFromFile();
-            for (auto& step : rs)
-            {
-                rotate_queue.push(step);
-            }
-            break;
-        case 3:
-            lightMov = !lightMov;
-            break;
-        }
-        return 0;
-    }
-    return CallWindowProc(OldProc, hwnd, message, wParam, lParam);
-}
-
 // settings
 const unsigned int SRC_WIDTH = GetSystemMetrics(SM_CXSCREEN);
 const unsigned int SRC_HEIGHT = GetSystemMetrics(SM_CYSCREEN);
@@ -183,6 +149,40 @@ float lastFrame = 0.0f;
 // lighting
 glm::vec3 lightPos(2.4f, 2.4f, 2.4f);
 bool lightMov = true;
+
+HWND hwndGL;
+WNDPROC OldProc;
+
+LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    move_seq_t rs;
+    switch (message)
+    {
+    case WM_COMMAND:
+        switch (wParam)
+        {
+        case 1:
+            rs = randomState();
+            for (auto& step : rs)
+            {
+                rotate_queue.push(step);
+            }
+            break;
+        case 2:
+            rs = readStateFromFile();
+            for (auto& step : rs)
+            {
+                rotate_queue.push(step);
+            }
+            break;
+        case 3:
+            lightMov = !lightMov;
+            break;
+        }
+        return 0;
+    }
+    return CallWindowProc(OldProc, hwnd, message, wParam, lParam);
+}
 
 int main()
 {
