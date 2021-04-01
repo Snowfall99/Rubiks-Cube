@@ -19,5 +19,5 @@ Using glad to render 27 blocks in order to construct the cube. Render a skybox f
 - [x] read state from file and generate cube based on it
 - [ ] auto-solve method
 - [x] Optimize URF move
-- [ ] Using dialog box to show error messages
+- [x] Using dialog box to show error messages
 - [ ] Light and plysic material
