@@ -77,6 +77,29 @@ move_seq_t randomState(int steps = 15)
     return rs;
 }
 
+HWND hwndGL;
+WNDPROC OldProc;
+
+LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    switch (message)
+    {
+    case WM_COMMAND:
+        switch (wParam)
+        {
+        case 1:
+            move_seq_t rs = randomState();
+            for (auto& step : rs)
+            {
+                rotate_queue.push(step);
+            }
+            break;
+        }
+        return 0;
+    }
+    return CallWindowProc(OldProc, hwnd, message, wParam, lParam);
+}
+
 // settings
 const unsigned int SRC_WIDTH = GetSystemMetrics(SM_CXSCREEN);
 const unsigned int SRC_HEIGHT = GetSystemMetrics(SM_CYSCREEN);
@@ -140,7 +163,7 @@ int main()
     glfwSetKeyCallback(window, on_key_callback);
 
     // tell GLFW to capture our mouse
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
@@ -154,6 +177,18 @@ int main()
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    // Menu
+    hwndGL = GetActiveWindow();
+    ShowWindow(hwndGL, SW_MAXIMIZE);
+    HMENU hMenu;
+    hMenu = CreateMenu();
+
+    OldProc = (WNDPROC)SetWindowLong(hwndGL, GWL_WNDPROC, (LONG)WndProc);
+
+    AppendMenu(hMenu, MF_STRING, 1, TEXT("Random State"));
+    AppendMenu(hMenu, MF_STRING, 2, TEXT("Reset State"));
+    SetMenu(hwndGL, hMenu);
 
     // build and compile our shader zprogram
     // ------------------------------------
@@ -375,14 +410,10 @@ int main()
     // Shader configuration
     cubeShader.use();
 
-    /*skyboxShader.use();
-    skyboxShader.setInt("skybox", 0);*/
-
     // pass projection matrix to shader (as projection matrix rarely changes there's no need to do this per frame)
     // -----------------------------------------------------------------------------------------------------------
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)SRC_WIDTH / (float)SRC_HEIGHT, 0.1f, 100.0f);
     cubeShader.setMat4("projection", projection);
-    // skyboxShader.setMat4("projection", projection);
 
     // render loop
     // -----------
@@ -430,6 +461,7 @@ int main()
                 nextState = rotate_queue.front();
                 rotate_queue.pop();
             }
+
 
             if (nextState == ROTATE_L)
             {
@@ -740,8 +772,6 @@ int main()
 
         // cubes
         glBindVertexArray(cubeVAO);
-        /*glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, cubeTexture);*/
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
 
@@ -827,15 +857,6 @@ void processInput(GLFWwindow* window)
     {
         currentModel = glm::mat4(1.0f);
     }
-    // Random state
-    if (glfwGetKey(window, GLFW_KEY_7) == GLFW_PRESS)
-    {
-        random_state = randomState();
-        for (auto &step: random_state) 
-        {
-            rotate_queue.push(step);
-        }
-    }
 }
 
 void on_key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
@@ -844,19 +865,16 @@ void on_key_callback(GLFWwindow* window, int key, int scancode, int action, int 
     {
         lock_guard<mutex> lock(axismutex);
         rotate_queue.push(ROTATE_R);
-        //targetangle = 90;
     }
     if (key == GLFW_KEY_L && action == GLFW_PRESS)
     {
         lock_guard<mutex> lock(axismutex);
         rotate_queue.push(ROTATE_L);
-        //targetangle = 90;
     }
     if (key == GLFW_KEY_U && action == GLFW_PRESS)
     {
         lock_guard<mutex> lock(axismutex);
         rotate_queue.push(ROTATE_U);
-        //targetangle = 90;
     }
     if (key == GLFW_KEY_D && action == GLFW_PRESS)
     {
@@ -868,13 +886,11 @@ void on_key_callback(GLFWwindow* window, int key, int scancode, int action, int 
     {
         lock_guard<mutex> lock(axismutex);
         rotate_queue.push(ROTATE_F);
-        //targetangle = 90;
     }
     if (key == GLFW_KEY_B && action == GLFW_PRESS)
     {
         lock_guard<mutex> lock(axismutex);
         rotate_queue.push(ROTATE_B);
-        //targetangle = 90;
     }
 }
 
@@ -892,6 +908,9 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 // -------------------------------------------------------
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
+    if (!glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT))
+        return;
+
     if (firstMouse)
     {
         lastX = xpos;
