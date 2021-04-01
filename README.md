@@ -9,10 +9,10 @@ I will turn to glad in the next version, despite of the fact that I only have li
 ## Version 2
 Using glad to render 27 blocks in order to construct the cube. Render a skybox for background.  
 
+
 **Todo List**  
 - [ ] Edge display
 - [x] skybox render 
-- [ ] face state display 
 - [x] Human-computer interaction page
 - [x] generate a random state cube
 - [ ] State reset
@@ -21,3 +21,8 @@ Using glad to render 27 blocks in order to construct the cube. Render a skybox f
 - [x] Optimize URF move
 - [x] Using dialog box to show error messages
 - [x] Light and plysic material
+- [ ] Anti aliasing
+- [ ] Multiple light
+- [ ] Bloom
+- [ ] shadow
+- [ ] FrameBuffers
