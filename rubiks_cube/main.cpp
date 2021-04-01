@@ -533,19 +533,19 @@ int main()
             {
                 state = ROTATE_R;
                 angle = 0;
-                axisVec = glm::vec3(1.0f, 0.0f, 0.0f);
+                axisVec = glm::vec3(-1.0f, 0.0f, 0.0f);
             }
             else if (nextState == ROTATE_U)
             {
                 state = ROTATE_U;
                 angle = 0;
-                axisVec = glm::vec3(0.0f, 1.0f, 0.0f);
+                axisVec = glm::vec3(0.0f, -1.0f, 0.0f);
             }
             else if (nextState == ROTATE_F)
             {
                 state = ROTATE_F;
                 angle = 0;
-                axisVec = glm::vec3(0.0f, 0.0f, 1.0f);
+                axisVec = glm::vec3(0.0f, 0.0f, -1.0f);
             }
             break;
         }
@@ -739,7 +739,7 @@ int main()
         }
         case UPDATE:
         {
-            //需要对axis变量上锁。
+            // lock axis
             unique_lock<mutex> lock(axismutex);
             for (int i = 0; i < 27; i++)
             {
@@ -752,7 +752,7 @@ int main()
                 {
                     if (x > -1.01f && x < -0.99f)
                     {
-                        //先更新旋转
+                        // update before rotate
                         glm::mat4 thistime = glm::rotate(world, glm::radians(targetangle), glm::vec3(1.f, 0.f, 0.f));
                         allMats[i] = thistime * allMats[i];
                     }
@@ -777,24 +777,24 @@ int main()
                 {
                     if (x < 1.01f && x > 0.99f)
                     {
-                        glm::mat4 thistime = glm::rotate(world, glm::radians(targetangle), glm::vec3(1.0f, 0.0f, 0.0f));
-                        allMats[i] = thistime * allMats[i];
+                        glm::mat4 updateMat = glm::rotate(world, glm::radians(targetangle), glm::vec3(-1.0f, 0.0f, 0.0f));
+                        allMats[i] = updateMat * allMats[i];
                     }
                 }
                 else if (nextState == ROTATE_U)
                 {
                     if (y < 1.01f && y > 0.99f)
                     {
-                        glm::mat4 thistime = glm::rotate(world, glm::radians(targetangle), glm::vec3(0.0f, 1.0f, 0.0f));
-                        allMats[i] = thistime * allMats[i];
+                        glm::mat4 updateMat = glm::rotate(world, glm::radians(targetangle), glm::vec3(0.0f, -1.0f, 0.0f));
+                        allMats[i] = updateMat * allMats[i];
                     }
                 }
                 else if (nextState == ROTATE_F)
                 {
                     if (z < 1.01f && z > 0.99f)
                     {
-                        glm::mat4 thistime = glm::rotate(world, glm::radians(targetangle), glm::vec3(0.0f, 0.0f, 1.0f));
-                        allMats[i] = thistime * allMats[i];
+                        glm::mat4 updateMat = glm::rotate(world, glm::radians(targetangle), glm::vec3(0.0f, 0.0f, -1.0f));
+                        allMats[i] = updateMat * allMats[i];
                     }
                 }
             }
