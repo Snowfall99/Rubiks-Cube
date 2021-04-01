@@ -11,7 +11,7 @@ Using glad to render 27 blocks in order to construct the cube. Render a skybox f
 
 **Todo List**  
 - [ ] Edge display
-- [ ] skybox render 
+- [x] skybox render 
 - [ ] face state display 
 - [ ] Human-computer interaction page
 - [ ] generate a random state cube
