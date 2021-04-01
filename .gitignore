@@ -7,3 +7,6 @@ rubiks_cube/rubiks_cube.vcxproj
 rubiks_cube/rubiks_cube.vcxproj.filters
 rubiks_cube/rubiks_cube.vcxproj.user
 rubiks_cube/stb_image.h
+Release
+rubiks_cube/Release
+rubiks_cube/rubiks_cube.exe

@@ -30,6 +30,7 @@ void on_key_callback(GLFWwindow*, int, int, int, int);
 void processInput(GLFWwindow* window);
 unsigned int loadCubemap(std::vector<std::string> faces);
 
+
 // Using State machine to present cube state
 enum State
 {
@@ -51,6 +52,45 @@ std::queue<State> rotate_queue;
 // store random state 
 typedef std::vector<State> move_seq_t;
 move_seq_t random_state;
+
+// Read state from a file
+move_seq_t readStateFromFile()
+{   
+    // set filename
+    const char* filename = "state.txt";
+    // read from file
+    std::ifstream myFile(filename);
+    if (!myFile.is_open())
+    {
+        /* Todo: use a dialog box to show error messages */
+        std::puts("Unable to open file\n");
+        std::exit(-1);
+    }
+    std::string line;
+    getline(myFile, line);
+    myFile.close();
+
+    // add state to rotate state
+    move_seq_t move_seq;
+    int i;
+    for (i = 0; i < line.length(); i++)
+    {
+        if (line[i] == 'U')
+            move_seq.push_back(ROTATE_U);
+        else if (line[i] == 'D')
+            move_seq.push_back(ROTATE_D);
+        else if (line[i] == 'R')
+            move_seq.push_back(ROTATE_R);
+        else if (line[i] == 'L')
+            move_seq.push_back(ROTATE_L);
+        else if (line[i] == 'F')
+            move_seq.push_back(ROTATE_F);
+        else if (line[i] == 'B')
+            move_seq.push_back(ROTATE_B);
+    }
+
+    return move_seq;
+}
 
 // generate a sequence of state randomly
 move_seq_t randomState(int steps = 15) 
@@ -82,13 +122,21 @@ WNDPROC OldProc;
 
 LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    move_seq_t rs;
     switch (message)
     {
     case WM_COMMAND:
         switch (wParam)
         {
         case 1:
-            move_seq_t rs = randomState();
+            rs = randomState();
+            for (auto& step : rs)
+            {
+                rotate_queue.push(step);
+            }
+            break;
+        case 2:
+            rs = readStateFromFile();
             for (auto& step : rs)
             {
                 rotate_queue.push(step);
@@ -187,7 +235,7 @@ int main()
     OldProc = (WNDPROC)SetWindowLong(hwndGL, GWL_WNDPROC, (LONG)WndProc);
 
     AppendMenu(hMenu, MF_STRING, 1, TEXT("Random State"));
-    AppendMenu(hMenu, MF_STRING, 2, TEXT("Reset State"));
+    AppendMenu(hMenu, MF_STRING, 2, TEXT("Read State"));
     SetMenu(hwndGL, hMenu);
 
     // build and compile our shader zprogram
@@ -407,8 +455,8 @@ int main()
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(1);
 
-    // Shader configuration
-    cubeShader.use();
+     // Shader configuration
+     cubeShader.use();
 
     // pass projection matrix to shader (as projection matrix rarely changes there's no need to do this per frame)
     // -----------------------------------------------------------------------------------------------------------
@@ -988,4 +1036,9 @@ unsigned int loadCubemap(vector<std::string> faces)
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
     return textureID;
+}
+
+void initState()
+{
+    return;
 }
