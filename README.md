@@ -28,9 +28,10 @@ Current effect is as follows.
 - [ ] auto-solve method
 - [x] Optimize URF move
 - [x] Using dialog box to show error messages
-- [x] Light and plysic material
+- [x] Light
 - [ ] Anti aliasing
-- [ ] Multiple light
+- [x] Material: Pearl
+- [x] Multiple light
 - [ ] Bloom
 - [ ] shadow
 - [ ] FrameBuffers
