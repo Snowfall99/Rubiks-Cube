@@ -17,6 +17,7 @@
 #include <mutex>
 #include <random>
 #include <queue>
+#include <map>
 
 using namespace std;
 
@@ -150,6 +151,17 @@ float lastFrame = 0.0f;
 glm::vec3 lightPos(2.4f, 2.4f, 2.4f);
 bool lightMov = false;
 
+// material
+enum Material 
+{
+    Emerald,
+    Jade,
+    Pearl,
+    White_plastic,
+    White_rubber,
+};
+Material material = Pearl;
+
 HWND hwndGL;
 WNDPROC OldProc;
 
@@ -177,6 +189,22 @@ LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         case 3:
             lightMov = !lightMov;
+            break;
+        // Change material
+        case 11:
+            material = Pearl;
+            break;
+        case 12:
+            material = White_plastic;
+            break;
+        case 13:
+            material = White_rubber;
+            break;
+        case 14:
+            material = Emerald;
+            break;
+        case 15:
+            material = Jade;
             break;
         }
         return 0;
@@ -229,18 +257,29 @@ int main()
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Use for debug
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Menu
     hwndGL = GetActiveWindow();
     ShowWindow(hwndGL, SW_MAXIMIZE);
-    HMENU hMenu;
-    hMenu = CreateMenu();
+    HMENU hMenu = CreateMenu();
+    HMENU hMenu_material = CreatePopupMenu();
+    HMENU hMenu_light = CreatePopupMenu();
 
     OldProc = (WNDPROC)SetWindowLong(hwndGL, GWL_WNDPROC, (LONG)WndProc);
 
     AppendMenu(hMenu, MF_STRING, 1, TEXT("Random State"));
     AppendMenu(hMenu, MF_STRING, 2, TEXT("Read State"));
     AppendMenu(hMenu, MF_STRING, 3, TEXT("Light Move/Stop"));
+    AppendMenu(hMenu, MF_POPUP, (UINT)hMenu_material, TEXT("Material"));
+    AppendMenu(hMenu, MF_POPUP, (UINT)hMenu_light, TEXT("Light"));
+    AppendMenu(hMenu_material, MF_STRING, 11, TEXT("Pearl"));
+    AppendMenu(hMenu_material, MF_STRING, 12, TEXT("White plastic"));
+    AppendMenu(hMenu_material, MF_STRING, 13, TEXT("White rubber"));
+    AppendMenu(hMenu_material, MF_STRING, 14, TEXT("Emerald"));
+    AppendMenu(hMenu_material, MF_STRING, 15, TEXT("Jade"));
+
     SetMenu(hwndGL, hMenu);
 
     // build and compile our shader zprogram
@@ -473,6 +512,16 @@ int main()
         glm::vec3(0.0f,  2.5f,  0.0f)
     };
 
+    // material list
+    float materialVertices[] = {
+        // Ambient                 // Diffuse                    // Specular                         // shininess
+        0.0215f, 0.1745f,  0.0215f,  0.07568f, 0.61424f, 0.07568f, 0.633f,    0.727811f, 0.633f,     0.6f,          // Emerald
+        0.135f,  0.2225f,  0.1575f,  0.54f,    0.89f,    0.63f,    0.316228f, 0.316228f, 0.316228f,  0.1f,          // Jade
+        0.25f,   0.20725f, 0.20725f, 1.0f,     0.829f,   0.829f,   0.296648f, 0.296648f, 0.296648f,  0.088f,        // Pearl
+        0.0f,    0.0f,     0.0f,     0.55f,    0.55f,    0.55f,    0.70f,     0.70f,     0.70f,      0.25f,         // White plastic
+        0.05f,   0.05f,    0.05f,    0.5f,     0.5f,     0.5f,     0.7f,      0.7f,      0.7f,       0.78125f       // White rubber
+    };
+
     // skybox VAO
     unsigned int skyboxVAO, skyboxVBO;
     glGenVertexArrays(1, &skyboxVAO);
@@ -543,6 +592,13 @@ int main()
 
         // Input 
         processInput(window);
+        /* Todo */
+        /*std::map<float, glm::vec3> sorted;
+        for (int i = 0; i < sizeof(blockPositions) / sizeof(glm::vec3); i++)
+        {
+            float distance = glm::length(camera.Position - blockPositions[i]);
+            sorted[distance] = blockPositions[i];
+        }*/
         
         // Render
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -620,10 +676,41 @@ int main()
         cubeShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
 
         // material properties
-        cubeShader.setVec3("material.ambient", 0.25f, 0.20725f, 0.20725f);
-        cubeShader.setVec3("material.diffuse", 1.0f, 0.829f, 0.829f);
-        cubeShader.setVec3("material.specular", 0.296648f, 0.296648f, 0.296648f); // specular lighting doesn't have full effect on this object's material
-        cubeShader.setFloat("material.shininess", 32.0f);
+        if (material == Pearl)
+        {
+            cubeShader.setVec3("material.ambient", materialVertices[20], materialVertices[21], materialVertices[22]);
+            cubeShader.setVec3("material.diffuse", materialVertices[23], materialVertices[24], materialVertices[25]);
+            cubeShader.setVec3("material.specular", materialVertices[26], materialVertices[27], materialVertices[28]); // specular lighting doesn't have full effect on this object's material
+            cubeShader.setFloat("material.shininess", 128.0f * materialVertices[29]);
+        }
+        else if (material == White_plastic)
+        {
+            cubeShader.setVec3("material.ambient", materialVertices[30], materialVertices[31], materialVertices[32]);
+            cubeShader.setVec3("material.diffuse", materialVertices[33], materialVertices[34], materialVertices[35]);
+            cubeShader.setVec3("material.specular", materialVertices[36], materialVertices[37], materialVertices[38]); // specular lighting doesn't have full effect on this object's material
+            cubeShader.setFloat("material.shininess", 128.0f * materialVertices[39]);
+        }
+        else if (material == White_rubber)
+        {
+            cubeShader.setVec3("material.ambient", materialVertices[40], materialVertices[41], materialVertices[42]);
+            cubeShader.setVec3("material.diffuse", materialVertices[43], materialVertices[44], materialVertices[45]);
+            cubeShader.setVec3("material.specular", materialVertices[46], materialVertices[47], materialVertices[48]); // specular lighting doesn't have full effect on this object's material
+            cubeShader.setFloat("material.shininess", 128.0f * materialVertices[49]);
+        }
+        else if (material == Emerald)
+        {
+            cubeShader.setVec3("material.ambient", materialVertices[0], materialVertices[1], materialVertices[2]);
+            cubeShader.setVec3("material.diffuse", materialVertices[3], materialVertices[4], materialVertices[5]);
+            cubeShader.setVec3("material.specular", materialVertices[6], materialVertices[7], materialVertices[8]); // specular lighting doesn't have full effect on this object's material
+            cubeShader.setFloat("material.shininess", 128.0f * materialVertices[9]);
+        }
+        else if (material == Jade)
+        {
+            cubeShader.setVec3("material.ambient", materialVertices[10], materialVertices[11], materialVertices[12]);
+            cubeShader.setVec3("material.diffuse", materialVertices[13], materialVertices[14], materialVertices[15]);
+            cubeShader.setVec3("material.specular", materialVertices[16], materialVertices[17], materialVertices[18]); // specular lighting doesn't have full effect on this object's material
+            cubeShader.setFloat("material.shininess", 128.0f * materialVertices[19]);
+        }
 
         // camera/view transformation
         view = glm::lookAt(camera.Position, glm::vec3(0.f, 0.f, 0.f), camera.Up);
@@ -962,6 +1049,18 @@ int main()
             break;
         }
         }
+
+        /* Todo */
+        //// transparent effect
+        //for (std::map<float, glm::vec3>::reverse_iterator it = sorted.rbegin(); it != sorted.rend(); ++it)
+        //{
+        //    model = glm::mat4(1.0f);
+        //    model = glm::translate(model, it->second);
+        //    cubeShader.setMat4("model", model);
+        //    glBindVertexArray(cubeVAO);
+        //    glDrawArrays(GL_TRIANGLES, 0, 36);
+        //}
+
 
         // draw the lamp object
         lightCubeShader.use();

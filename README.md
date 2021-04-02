@@ -24,13 +24,17 @@ Current effect is as follows.
 - [x] Human-computer interaction page
 - [x] generate a random state cube
 - [ ] State reset
+- [ ] Generate random state with one click
 - [x] read state from file and generate cube based on it
 - [ ] auto-solve method
 - [x] Optimize URF move
 - [x] Using dialog box to show error messages
 - [x] Light
+- [ ] Light turn on and ture off
+- [ ] light color change
 - [ ] Anti aliasing
 - [x] Material: Pearl
+- [ ] Material change
 - [x] Multiple light
 - [ ] Bloom
 - [ ] shadow
