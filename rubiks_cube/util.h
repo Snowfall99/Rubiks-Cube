@@ -3,6 +3,7 @@
 #define UTIL_H
 
 #include "root.h"
+#include "rotate.h"
 
 namespace cube
 {
@@ -195,7 +196,7 @@ namespace cube
     }
 
     // generate a sequence of state randomly
-    move_seq_t randomState(int steps = 15)
+    move_seq_t randomQueue(int steps = 15)
     {
         std::uniform_int_distribution<int> gen(0, 5);
 
@@ -219,6 +220,17 @@ namespace cube
         return rs;
     }
 
+    void randomState(move_seq_t rs, Shader shader, unsigned int VAO)
+    {
+        for (auto& step : rs)
+        {
+            nextState = step;
+            update(shader, VAO);
+        }
+        nextState = STOP;
+        state = STOP;
+    }
+
     LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         move_seq_t rs;
@@ -228,18 +240,10 @@ namespace cube
             switch (wParam)
             {
             case 1:
-                rs = randomState();
-                for (auto& step : rs)
-                {
-                    rotate_queue.push(step);
-                }
+                mode = Random;
                 break;
             case 2:
-                rs = readStateFromFile();
-                for (auto& step : rs)
-                {
-                    rotate_queue.push(step);
-                }
+                mode = Read_File;
                 break;
             case 3:
                 lightMov = !lightMov;

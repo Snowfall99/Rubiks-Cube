@@ -36,7 +36,6 @@ namespace cube
         ROTATE_D,
         ROTATE_F,
         ROTATE_B,
-        UPDATE,
     };
 
     State state = STOP;
@@ -45,6 +44,15 @@ namespace cube
     // store rotate state
     std::queue<State> rotate_queue;
     typedef std::vector<State> move_seq_t;
+
+    // three modes
+    enum Mode
+    {
+        Random,
+        Read_File,
+        Default,
+    };
+    Mode mode = Default;
 
     // settings
     const unsigned int SRC_WIDTH = GetSystemMetrics(SM_CXSCREEN);
