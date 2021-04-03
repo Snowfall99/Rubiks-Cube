@@ -17,6 +17,24 @@ Current effect is as follows.
 
 ![avatar](./pic.jpg)
 
+## Keyboard instructions
+- `R`: rotate right face
+- `L`: rotate left face
+- `F`: rotate front face
+- `B`: rotate back face
+- `U`: rotate up face
+- `D`: rotate down face
+
+- `Up`: Pitch up
+- `Down`:Pitch down
+- `Right`: Change Yaw
+- `Left`: Change Yaw
+
+- `1-6`: Change deltaX-Z
+-`0`: reset position
+
+- `mouse_left button`: camera rotate
+- `mouse scroll`: move camera position
 
 **Todo List**  
 - [ ] Edge display
@@ -34,7 +52,7 @@ Current effect is as follows.
 - [ ] light color change
 - [ ] Anti aliasing
 - [x] Material: Pearl
-- [ ] Material change
+- [x] Material change
 - [x] Multiple light
 - [ ] Bloom
 - [ ] shadow

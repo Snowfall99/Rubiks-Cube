@@ -150,6 +150,7 @@ float lastFrame = 0.0f;
 // lighting
 glm::vec3 lightPos(2.4f, 2.4f, 2.4f);
 bool lightMov = false;
+bool lightOn = true;
 
 // material
 enum Material 
@@ -159,6 +160,10 @@ enum Material
     Pearl,
     White_plastic,
     White_rubber,
+    Obsidian,
+    Ruby,
+    Turquoise,
+    Silver
 };
 Material material = Pearl;
 
@@ -205,6 +210,21 @@ LRESULT WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
         case 15:
             material = Jade;
+            break;
+        case 16:
+            material = Obsidian;
+            break;
+        case 17:
+            material = Ruby;
+            break;
+        case 18:
+            material = Turquoise;
+            break;
+        case 19:
+            material = Silver;
+            break;
+        case 21:
+            lightOn = !lightOn;
             break;
         }
         return 0;
@@ -279,6 +299,12 @@ int main()
     AppendMenu(hMenu_material, MF_STRING, 13, TEXT("White rubber"));
     AppendMenu(hMenu_material, MF_STRING, 14, TEXT("Emerald"));
     AppendMenu(hMenu_material, MF_STRING, 15, TEXT("Jade"));
+    AppendMenu(hMenu_material, MF_STRING, 16, TEXT("Obsidian"));
+    AppendMenu(hMenu_material, MF_STRING, 17, TEXT("Ruby"));
+    AppendMenu(hMenu_material, MF_STRING, 18, TEXT("Turquoise"));
+    AppendMenu(hMenu_material, MF_STRING, 19, TEXT("Silver"));
+    AppendMenu(hMenu_light, MF_STRING, 21, TEXT("On/Off"));
+    AppendMenu(hMenu_light, MF_STRING, 22, TEXT("Gradient"));
 
     SetMenu(hwndGL, hMenu);
 
@@ -519,7 +545,11 @@ int main()
         0.135f,  0.2225f,  0.1575f,  0.54f,    0.89f,    0.63f,    0.316228f, 0.316228f, 0.316228f,  0.1f,          // Jade
         0.25f,   0.20725f, 0.20725f, 1.0f,     0.829f,   0.829f,   0.296648f, 0.296648f, 0.296648f,  0.088f,        // Pearl
         0.0f,    0.0f,     0.0f,     0.55f,    0.55f,    0.55f,    0.70f,     0.70f,     0.70f,      0.25f,         // White plastic
-        0.05f,   0.05f,    0.05f,    0.5f,     0.5f,     0.5f,     0.7f,      0.7f,      0.7f,       0.78125f       // White rubber
+        0.05f,   0.05f,    0.05f,    0.5f,     0.5f,     0.5f,     0.7f,      0.7f,      0.7f,       0.78125f,      // White rubber
+        0.05375f,0.05f,    0.06625f, 0.18275f, 0.17f,    0.22525f, 0.332741f, 0.328634f, 0.346435f,  0.3f,          // Obsidian
+        0.1745f, 0.01175f, 0.01175f, 0.61424f, 0.04136f, 0.04136f, 0.727811f, 0.626959f, 0.626959f,  0.6f,          // Ruby
+        0.1f,    0.18725f, 0.1745f,  0.396f,   0.74151f, 0.69102f, 0.297254f, 0.30829f,  0.306678f,  0.1f,          // Turquoise
+        0.19225f,0.19225f, 0.19225f, 0.50754f, 0.50754f, 0.50754f, 0.508273f, 0.508273f, 0.508273f,  0.4f           // Silver
     };
 
     // skybox VAO
@@ -710,6 +740,34 @@ int main()
             cubeShader.setVec3("material.diffuse", materialVertices[13], materialVertices[14], materialVertices[15]);
             cubeShader.setVec3("material.specular", materialVertices[16], materialVertices[17], materialVertices[18]); // specular lighting doesn't have full effect on this object's material
             cubeShader.setFloat("material.shininess", 128.0f * materialVertices[19]);
+        }
+        else if (material == Obsidian)
+        {
+            cubeShader.setVec3("material.ambient", materialVertices[50], materialVertices[51], materialVertices[52]);
+            cubeShader.setVec3("material.diffuse", materialVertices[53], materialVertices[54], materialVertices[55]);
+            cubeShader.setVec3("material.specular", materialVertices[56], materialVertices[57], materialVertices[58]); // specular lighting doesn't have full effect on this object's material
+            cubeShader.setFloat("material.shininess", 128.0f * materialVertices[59]);
+        }
+        else if (material == Ruby)
+        {
+            cubeShader.setVec3("material.ambient", materialVertices[60], materialVertices[61], materialVertices[62]);
+            cubeShader.setVec3("material.diffuse", materialVertices[63], materialVertices[64], materialVertices[65]);
+            cubeShader.setVec3("material.specular", materialVertices[66], materialVertices[67], materialVertices[68]); // specular lighting doesn't have full effect on this object's material
+            cubeShader.setFloat("material.shininess", 128.0f * materialVertices[69]);
+        }
+        else if (material == Turquoise)
+        {
+            cubeShader.setVec3("material.ambient", materialVertices[70], materialVertices[71], materialVertices[72]);
+            cubeShader.setVec3("material.diffuse", materialVertices[73], materialVertices[74], materialVertices[75]);
+            cubeShader.setVec3("material.specular", materialVertices[76], materialVertices[77], materialVertices[78]); // specular lighting doesn't have full effect on this object's material
+            cubeShader.setFloat("material.shininess", 128.0f * materialVertices[79]);
+        }
+        else if (material == Silver)
+        {
+            cubeShader.setVec3("material.ambient", materialVertices[80], materialVertices[81], materialVertices[82]);
+            cubeShader.setVec3("material.diffuse", materialVertices[83], materialVertices[84], materialVertices[85]);
+            cubeShader.setVec3("material.specular", materialVertices[86], materialVertices[87], materialVertices[88]); // specular lighting doesn't have full effect on this object's material
+            cubeShader.setFloat("material.shininess", 128.0f * materialVertices[89]);
         }
 
         // camera/view transformation
@@ -985,48 +1043,48 @@ int main()
                     if (x > -1.01f && x < -0.99f)
                     {
                         // update before rotate
-                        glm::mat4 thistime = glm::rotate(world, glm::radians(targetangle), glm::vec3(1.f, 0.f, 0.f));
-                        allMats[i] = thistime * allMats[i];
+                        glm::mat4 newMat = glm::rotate(world, glm::radians(targetangle), glm::vec3(1.f, 0.f, 0.f));
+                        allMats[i] = newMat * allMats[i];
                     }
                 }
                 else if (nextState == ROTATE_D)
                 {
                     if (y > -1.01f && y < -0.99f)
                     {
-                        glm::mat4 thistime = glm::rotate(world, glm::radians(targetangle), glm::vec3(0.0f, 1.0f, 0.0f));
-                        allMats[i] = thistime * allMats[i];
+                        glm::mat4 newMat = glm::rotate(world, glm::radians(targetangle), glm::vec3(0.0f, 1.0f, 0.0f));
+                        allMats[i] = newMat * allMats[i];
                     }
                 }
                 else if (nextState == ROTATE_B)
                 {
                     if (z > -1.01f && z < -0.99f)
                     {
-                        glm::mat4 thistime = glm::rotate(world, glm::radians(targetangle), glm::vec3(0.0f, 0.0f, 1.0f));
-                        allMats[i] = thistime * allMats[i];
+                        glm::mat4 newMat = glm::rotate(world, glm::radians(targetangle), glm::vec3(0.0f, 0.0f, 1.0f));
+                        allMats[i] = newMat * allMats[i];
                     }
                 }
                 else if (nextState == ROTATE_R)
                 {
                     if (x < 1.01f && x > 0.99f)
                     {
-                        glm::mat4 updateMat = glm::rotate(world, glm::radians(targetangle), glm::vec3(-1.0f, 0.0f, 0.0f));
-                        allMats[i] = updateMat * allMats[i];
+                        glm::mat4 newMat = glm::rotate(world, glm::radians(targetangle), glm::vec3(-1.0f, 0.0f, 0.0f));
+                        allMats[i] = newMat * allMats[i];
                     }
                 }
                 else if (nextState == ROTATE_U)
                 {
                     if (y < 1.01f && y > 0.99f)
                     {
-                        glm::mat4 updateMat = glm::rotate(world, glm::radians(targetangle), glm::vec3(0.0f, -1.0f, 0.0f));
-                        allMats[i] = updateMat * allMats[i];
+                        glm::mat4 newMat = glm::rotate(world, glm::radians(targetangle), glm::vec3(0.0f, -1.0f, 0.0f));
+                        allMats[i] = newMat * allMats[i];
                     }
                 }
                 else if (nextState == ROTATE_F)
                 {
                     if (z < 1.01f && z > 0.99f)
                     {
-                        glm::mat4 updateMat = glm::rotate(world, glm::radians(targetangle), glm::vec3(0.0f, 0.0f, -1.0f));
-                        allMats[i] = updateMat * allMats[i];
+                        glm::mat4 newMat = glm::rotate(world, glm::radians(targetangle), glm::vec3(0.0f, 0.0f, -1.0f));
+                        allMats[i] = newMat * allMats[i];
                     }
                 }
             }
@@ -1061,9 +1119,12 @@ int main()
         //    glDrawArrays(GL_TRIANGLES, 0, 36);
         //}
 
-
         // draw the lamp object
         lightCubeShader.use();
+        /*if (lightOn == true)
+            lightCubeShader.setVec4("lightColor", glm::vec4(1.0f));
+        else
+            lightCubeShader.setVec4("lightColor", glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));*/
         lightCubeShader.setMat4("projection", projection);
         lightCubeShader.setMat4("view", view);
         glBindVertexArray(lightCubeVAO);
@@ -1075,13 +1136,13 @@ int main()
             lightCubeShader.setMat4("model", model);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
-
         // draw skybox as last
         glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
         skyboxShader.use();
         view = glm::mat4(glm::mat3(camera.GetViewMatrix())); // remove translation from the view matrix
         skyboxShader.setMat4("view", view);
         skyboxShader.setMat4("projection", projection);
+
         // skybox cube
         glBindVertexArray(skyboxVAO);
         glActiveTexture(GL_TEXTURE0);
