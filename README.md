@@ -13,6 +13,17 @@ For temporary, I only use one point light. For further development, there are st
 
 On the other hand, I will make some optimization on coding style and more functions.
 
+## Version 2.1.0  
+Reconstruct the whole project in order to make it more readable and modularable.  
+
+## Version 2.1.1
+Optimize cube state generation, now you can generate a random cube state with one click and no need to wait for roataing time
+
+## Version 2.1.2
+Add Reset button.  
+
+**Attention**: Do not click reset button during the rotating action, otherwise, the cube will end in a unexpected state because of asychronization of data. 
+
 Current effect is as follows.
 
 ![avatar](./pic.jpg)
@@ -41,7 +52,7 @@ Current effect is as follows.
 - [x] skybox render 
 - [x] Human-computer interaction page
 - [x] generate a random state cube
-- [ ] State reset
+- [x] State reset
 - [x] Generate random state with one click
 - [x] read state from file and generate cube based on it
 - [ ] auto-solve method
