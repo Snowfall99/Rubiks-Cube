@@ -20,6 +20,8 @@
 #include <random>
 #include <string>
 #include <map>
+#include <stack>
+#include <iostream>
 
 std::random_device rd;
 std::mt19937 mt(rd());
@@ -43,6 +45,7 @@ namespace cube
 
     // store rotate state
     std::queue<State> rotate_queue;
+    std::stack<State> used_rotate_stack;
     typedef std::vector<State> move_seq_t;
 
     // three modes
@@ -53,6 +56,9 @@ namespace cube
         Default,
     };
     Mode mode = Default;
+
+    // Init sign
+    bool Init = false;
 
     // settings
     const unsigned int SRC_WIDTH = GetSystemMetrics(SM_CXSCREEN);

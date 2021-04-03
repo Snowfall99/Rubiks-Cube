@@ -34,6 +34,7 @@ namespace cube
             {
                 nextState = rotate_queue.front();
                 rotate_queue.pop();
+                used_rotate_stack.push(nextState);
             }
 
             if (nextState == ROTATE_L)

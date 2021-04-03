@@ -19,7 +19,7 @@ namespace cube
 
         AppendMenu(hMenu, MF_STRING, 1, TEXT("Random State"));
         AppendMenu(hMenu, MF_STRING, 2, TEXT("Read State"));
-        AppendMenu(hMenu, MF_STRING, 3, TEXT("Light Move/Stop"));
+        AppendMenu(hMenu, MF_STRING, 3, TEXT("Reset"));
         AppendMenu(hMenu, MF_POPUP, (UINT)hMenu_material, TEXT("Material"));
         AppendMenu(hMenu, MF_POPUP, (UINT)hMenu_light, TEXT("Light"));
         AppendMenu(hMenu_material, MF_STRING, 11, TEXT("Pearl"));
@@ -33,6 +33,8 @@ namespace cube
         AppendMenu(hMenu_material, MF_STRING, 19, TEXT("Silver"));
         AppendMenu(hMenu_light, MF_STRING, 21, TEXT("On/Off"));
         AppendMenu(hMenu_light, MF_STRING, 22, TEXT("Gradient"));
+        AppendMenu(hMenu_light, MF_STRING, 23, TEXT("Light Move/Stop"));
+
 
         SetMenu(hwndGL, hMenu);
 	}

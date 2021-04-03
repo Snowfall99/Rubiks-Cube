@@ -13,7 +13,7 @@ namespace cube
     void on_key_callback(GLFWwindow*, int, int, int, int);
     void processInput(GLFWwindow* window);
 
-    move_seq_t readStateFromFile();
+    void readStateFromFile(Shader, unsigned int);
 
     // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
     // ---------------------------------------------------------------------------------------------------------
@@ -158,7 +158,7 @@ namespace cube
     }
 
     // Read state from a file
-    move_seq_t readStateFromFile()
+    void readStateFromFile(Shader shader, unsigned int VAO)
     {
         // set filename
         const char* filename = "state.txt";
@@ -192,7 +192,14 @@ namespace cube
                 move_seq.push_back(ROTATE_B);
         }
 
-        return move_seq;
+        for (auto& step : move_seq)
+        {
+            nextState = step;
+            used_rotate_stack.push(nextState);
+            update(shader, VAO);
+        }
+
+        return;
     }
 
     // generate a sequence of state randomly
@@ -225,6 +232,7 @@ namespace cube
         for (auto& step : rs)
         {
             nextState = step;
+            used_rotate_stack.push(nextState);
             update(shader, VAO);
         }
         nextState = STOP;
@@ -246,9 +254,9 @@ namespace cube
                 mode = Read_File;
                 break;
             case 3:
-                lightMov = !lightMov;
+                Init = true;
                 break;
-                // Change material
+            // Change material
             case 11:
                 material = Pearl;
                 break;
@@ -279,10 +287,28 @@ namespace cube
             case 21:
                 lightOn = !lightOn;
                 break;
+            case 23:
+                lightMov = !lightMov;
+                break;
             }
             return 0;
         }
         return CallWindowProc(OldProc, hwnd, message, wParam, lParam);
+    }
+
+    void resetCube(Shader shader, unsigned int VAO)
+    {
+        State step;
+        while (!used_rotate_stack.empty())
+        {
+            step = used_rotate_stack.top();
+            used_rotate_stack.pop();
+            for (int i = 0; i < 3; i++)
+            {
+                nextState = step;
+                update(shader, VAO);
+            }
+        }
     }
 }
 

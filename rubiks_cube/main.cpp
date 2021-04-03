@@ -9,6 +9,7 @@
 #include "light.h"
 #include "material.h"
 #include "rotate.h"
+#include "cube.h"
 
 using namespace std;
 using namespace cube;
@@ -68,22 +69,9 @@ int main()
     unsigned int cubeVBO, cubeVAO;
     glGenVertexArrays(1, &cubeVAO);
     glGenBuffers(1, &cubeVBO);
-    glBindVertexArray(cubeVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(blockVertices), blockVertices, GL_STATIC_DRAW);
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    // normal attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    // color attribute
     unsigned int colorbuffer;
     glGenBuffers(1, &colorbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(color), color, GL_STATIC_DRAW);
-    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(2);
+    initCube(cubeVAO, cubeVBO, colorbuffer);
 
     // render loop
     // -----------
@@ -96,6 +84,7 @@ int main()
 
         // Input 
         processInput(window);
+
         /* Todo */
         /*std::map<float, glm::vec3> sorted;
         for (int i = 0; i < sizeof(blockPositions) / sizeof(glm::vec3); i++)
@@ -107,6 +96,13 @@ int main()
         // Render
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Reset cube
+        if (Init == true) 
+        {
+            resetCube(cubeShader, cubeVAO);
+            Init = false;
+        }
 
         if (lightMov == true) 
         {
@@ -149,12 +145,7 @@ int main()
         }
         else if (mode == Read_File)
         { 
-            move_seq_t rs = readStateFromFile();
-            for (auto& step : rs)
-            {
-                nextState = step;
-                update(cubeShader, cubeVAO);
-            }
+            readStateFromFile(cubeShader, cubeVAO);
             mode = Default;
         }
         else
